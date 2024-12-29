@@ -98,9 +98,147 @@ else:
     print("No action detected in the response.")
 ```
 
+## How to Use the `ra_with_functions_test.py` File
+
+## Steps to Run the ReAct Framework Agent
+
+### 1. **Ensure All Required Files Are Present**
+- `prompts.py`
+- `json_helpers.py`
+- `sample_functions.py`
+- `openai_module.py`
+
+### 2. **Verify the System Prompt in `prompts.py`**
+- Ensure the `react_system_prompt` aligns with the desired use case (e.g., weather-related queries).
+
+### 3. **Run the `ra_with_functions_test.py` Script**
+- Execute the following command:
+  ```bash
+  python ra_with_functions_test.py
+  ```
+
+### 4. **Input Query**
+- The input query is predefined in the script as:
+  ```text
+  "Should I take an umbrella when going out today in London?"
+  ```
+
+### 5. **Expected Output**
+The agent will:
+- Dynamically call the `get_weather` function with the parameter `city="London"`.
+- Process the response using the ReAct framework.
+- Output a context-aware response, such as:
+  ```text
+  -- Running get_weather with parameters {'city': 'London'}
+  Action_Response: Weather in London is cloudy.
+  ```
+
 ---
 
-## Key Components of the Code
+## Finalizing the AI Agent with the Final Loop
+
+Save the following code in `ra_final.py`:
+
+```python
+from openai_module import generate_text_with_conversation
+from prompts import react_system_prompt
+from sample_functions import get_weather
+from json_helpers import extract_json
+
+
+# Available actions are:
+available_actions = {
+    "get_weather": get_weather
+}
+
+
+prompt = """
+What is the weather in London today?"""
+
+messages = [
+    {"role": "system", "content": react_system_prompt},
+    {"role": "user", "content": prompt},
+]
+
+turn_count = 1
+max_turns = 5
+
+while turn_count < max_turns:
+    print(f"Loop: {turn_count}")
+    print("----------------------")
+    turn_count += 1
+
+    response = generate_text_with_conversation(messages, model="gpt-4")
+
+    print(response)
+
+    json_function = extract_json(response)
+
+    if json_function:
+        function_name = json_function[0]['function_name']
+        function_parms = json_function[0]['function_parms']
+        if function_name not in available_actions:
+            raise Exception(f"Unknown action: {
+                            function_name}: {function_parms}")
+        print(f" -- running {function_name} {function_parms}")
+        action_function = available_actions[function_name]
+        # call the function
+        result = action_function(**function_parms)
+        function_result_message = f"Action_Response: {result}"
+        messages.append({"role": "user", "content": function_result_message})
+        print(function_result_message)
+    else:
+        break
+```
+
+### **Steps to Finalize the AI Agent:**
+1. **Implement the Loop:**
+   - Define iteration limits (`turn_count`, `max_turns`) to control the processing cycle.
+   - Use the loop to dynamically process thoughts, actions, and responses until a final output is generated.
+   
+2. **Track Results:**
+   - Append the action response to the message history, enabling the AI to incorporate updated context in subsequent iterations.
+
+### **How the Loop Enhances the Agent:**
+- Enables multi-step reasoning, allowing the agent to refine its responses dynamically.
+- Ensures that the AI can process iterative tasks seamlessly.
+
+## How to Use the `ra_final.py` File
+
+### **Steps to Run the Finalized Agent:**
+1. **Ensure all required files are present:**
+   - `prompts.py`
+   - `json_helpers.py`
+   - `sample_functions.py`
+   - `openai_module.py`
+2. **Update the system prompt in `prompts.py` to reflect your specific use case.**
+3. **Run the `ra_final.py` script:**
+   ```bash
+   python ra_final.py
+4. **Input a query, such as: "What is the weather in London today"**
+
+**Expected Output:**
+The agent will dynamically call the get_weather function, iterate through the ReAct loop, and provide an accurate response based on the weather conditions. Here is an example output:
+```text
+Loop: 1
+----------------------
+Thought: I should check the weather in London first.
+Action: 
+
+{
+  "function_name": "get_weather",
+  "function_parms": {
+    "city": "London"
+  }
+}
+ -- running get_weather {'city': 'London'}
+Action_Response: cloudy
+Loop: 2
+----------------------
+Answer: The weather in London today is cloudy.
+```
+
+## Key Components of the Above Code Files
 
 1. **ReAct Framework:**
    - Utilizes the `react_system_prompt` from `prompts.py` to guide the language model.
@@ -121,6 +259,8 @@ else:
 1. **`prompts.py`:**
 - Contains the react_system_prompt, which guides the language model's decision-making process.
 - Defines the system-level instructions for the ReAct framework.
+- Allows for domain-specific AI agents by focusing the prompt and restricting available actions. 
+- Improves reliability and relevance of responses.
 
 2. **`ra_test.py`**
 - A simplified testing script for validating the ReAct framework agent.
@@ -135,6 +275,9 @@ else:
 
 4. **`json_helpers.py`**
 - Provides a utility function to parse JSON-formatted actions from the language model’s response.
+
+5. **`ra_final.py`**
+- Represents the fully implemented ReAct framework AI agent.
 
 ## Critical Files
 
@@ -208,4 +351,6 @@ Action_Response: Weather in London is cloudy.
 - **Automation:** Automatically identifies and executes required functions based on user input.
 - **Dynamic Decision-Making:** Uses the ReAct framework to adapt to various queries.
 - **Real-Time Integration:** Integrates with external tools like weather APIs to provide contextually accurate responses.
+- **Finalizing the Agent with a Loop:** The loop ensures the AI can handle multi-step reasoning and iterative tasks dynamically. Results are appended to the message history for context-aware responses.
+- **Adjusting the System Prompt:** Allows for domain-specific AI agents by focusing the prompt and restricting available actions. Improves reliability and relevance of responses.
 
