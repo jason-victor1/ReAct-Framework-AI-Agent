@@ -162,7 +162,7 @@ Make sure the following files are included:
 
 ## Example Output
 
-```bash
+```text
  -- Running get_weather with parameters {'city': 'London'}
 Action_Response: Weather in London is cloudy.
 ```
