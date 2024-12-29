@@ -117,6 +117,25 @@ else:
 
 ---
 
+## How the AI Agent Uses the Provided Files
+1. **`prompts.py`:**
+- Contains the react_system_prompt, which guides the language model's decision-making process.
+- Defines the system-level instructions for the ReAct framework.
+
+2. **`ra_test.py`**
+- A simplified testing script for validating the ReAct framework agent.
+- Provides additional test cases to ensure the agent handles various queries correctly.
+
+3. **`ra_with_functions_test.py`**
+- Implements the full ReAct framework logic for the AI agent.
+- Handles:
+   Dynamic prompt generation.
+   Action extraction and execution.
+   Final response generation.
+
+4. **`json_helpers.py`**
+- Provides a utility function to parse JSON-formatted actions from the language model’s response.
+
 ## Critical Files
 
 Make sure the following files are included:
@@ -160,8 +179,23 @@ Make sure the following files are included:
 
 ---
 
-## Example Output
+## Example Workflow and Output
 
+## Example Workflow
+
+### Input:
+*"Should I take an umbrella when going out today in London?"*
+
+### Process:
+1. **Thought:**
+   - *"I should check the weather in London."*
+2. **Action:**
+   - Calls `get_weather` with `city="London"`.
+3. **Action Response:**
+   - The `get_weather` function returns `"cloudy"`.
+
+## Example Output
+**Final Output:**
 ```text
  -- Running get_weather with parameters {'city': 'London'}
 Action_Response: Weather in London is cloudy.
